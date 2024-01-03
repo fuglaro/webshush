@@ -3,11 +3,11 @@
 A whisper thin SSH client for the browser.
 
 
+Login screen:
 ![Login](preview/login.png)
-(login screen)
 
+Connected terminal:
 ![Terminal](preview/terminal.png)
-(connected terminal)
 
 This is a simple web application to be used as an ssh client to connect to your ssh servers. This was forked from WebSSH with a reworked frontend.
 
