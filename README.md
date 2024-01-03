@@ -1,4 +1,4 @@
-## WebShuSH
+# WebShuSH
 
 A whisper thin SSH client for the browser.
 
@@ -11,7 +11,7 @@ Connected terminal:
 
 This is a simple web application to be used as an ssh client to connect to your ssh servers. This was forked from WebSSH with a reworked frontend.
 
-### Features
+## Features
 
 * SSH password authentication supported, including empty password.
 * SSH public-key authentication supported, including DSA RSA ECDSA Ed25519 keys.
@@ -21,7 +21,7 @@ This is a simple web application to be used as an ssh client to connect to your 
 * Terminal window resizable.
 * Modern browsers including Chrome, Firefox, Safari, Edge, Opera supported.
 
-#### Features beyond WebSSH
+### Features beyond WebSSH
 
  * Updated to xterm.js 5.3.0.
  * Staggeringly faster interactivity, especially with truecolor.
@@ -45,7 +45,7 @@ This is a simple web application to be used as an ssh client to connect to your 
  * Switched terminal resizing logic to xterm.js' fitAddon.
  * Simpler frontend codebase.
 
-### How it works
+## How it works
 ```
 +---------+     http     +--------+    ssh    +-----------+
 | browser | <==========> | webssh | <=======> | ssh server|
@@ -54,12 +54,12 @@ This is a simple web application to be used as an ssh client to connect to your 
 
 It is written in Python and javscript, based on tornado, paramiko and xterm.js.
 
-### Requirements
+## Requirements
 
 * Python 3.8+
 
 
-### Quickstart
+## Quickstart
 
 1. Clone this repo.
 2. Install dependencies with `pip install -r requirements.txt && npm ci`
@@ -67,7 +67,7 @@ It is written in Python and javscript, based on tornado, paramiko and xterm.js.
 3. Open your browser, navigate to `127.0.0.1:8888`
 4. Login, and connect.
 
-### Server options
+## Server Options
 
 ```bash
 # start a http server with specified listen address and listen port
@@ -89,16 +89,29 @@ wssh --log-file-prefix=main.log
 wssh --help
 ```
 
+## URL Arguments
 
-### URL Arguments
-
-All login screen options can be provided as URL parameters like following examples:
+All login screen options can be provided as URL parameters. E.g:
 
 ```
 http://localhost:8888/?hostname=localhost&theme=nord
 ```
 
-### Use Docker
+## Tests
+
+Install Requirements
+```
+pip install pytest pytest-cov codecov flake8 mock
+```
+
+Run all tests
+```
+python -m pytest tests
+```
+
+## Deployment
+
+### Docker
 
 Start up the app
 ```
@@ -110,19 +123,7 @@ Tear down the app
 docker-compose down
 ```
 
-### Tests
-
-Requirements
-```
-pip install pytest pytest-cov codecov flake8 mock
-```
-
-Run all tests
-```
-python -m pytest tests
-```
-
-### Deployment
+### Nginx
 
 Running behind an Nginx server
 
@@ -148,8 +149,7 @@ Running as a standalone server
 wssh --port=8080 --sslport=4433 --certfile='cert.crt' --keyfile='cert.key' --xheaders=False --policy=reject
 ```
 
-
-### Important Security Notices
+# Important Security Notice
 
 * For whatever deployment choice you choose, don't forget to enable SSL.
 * This is essential to avoid exposing credentials over an unencrypted channel.
