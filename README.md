@@ -1,32 +1,49 @@
-## WebSSH
+## WebShuSH
 
-[![python](https://github.com/huashengdun/webssh/actions/workflows/python.yml/badge.svg)](https://github.com/huashengdun/webssh/actions/workflows/python.yml)
-[![codecov](https://raw.githubusercontent.com/huashengdun/webssh/coverage-badge/coverage.svg)](https://raw.githubusercontent.com/huashengdun/webssh/coverage-badge/coverage.svg)
-![PyPI - Python Version](https://img.shields.io/pypi/pyversions/webssh.svg)
-![PyPI](https://img.shields.io/pypi/v/webssh.svg)
+A whisper thin SSH client for the browser.
 
 
-### Introduction
+![Login](preview/login.png)
+(login screen)
 
-A simple web application to be used as an ssh client to connect to your ssh servers. It is written in Python, base on tornado, paramiko and xterm.js.
+![Terminal](preview/terminal.png)
+(connected terminal)
+
+This is a simple web application to be used as an ssh client to connect to your ssh servers. This was forked from WebSSH with a reworked frontend.
 
 ### Features
 
 * SSH password authentication supported, including empty password.
 * SSH public-key authentication supported, including DSA RSA ECDSA Ed25519 keys.
 * Encrypted keys supported.
-* Two-Factor Authentication (time-based one-time password) supported.
-* Fullscreen terminal supported.
+* Two-Factor Authentication (time-based one-time codes) supported.
+* Fullscreen terminal.
 * Terminal window resizable.
-* Auto detect the ssh server's default encoding.
 * Modern browsers including Chrome, Firefox, Safari, Edge, Opera supported.
 
+#### Features beyond WebSSH
 
-### Preview
-
-![Login](preview/login.png)
-![Terminal](preview/terminal.png)
-
+ * Updated to xterm.js 5.3.0.
+ * Staggeringly faster interactivity, especially with truecolor.
+ * Support changing font size while connected to terminal.
+ * Support changing theme while connected to terminal.
+ * Added all the themes from Alacritty (over 100).
+ * Default theme switched to Alacritty's default theme.
+ * Allow theme selection to be included in the URL parameters.
+ * Added Copy Mode allowing Copy/Paste shortcuts on Linux and Windows.
+ * Support for region select and forced selection from Macs.
+ * Disable most browser based keyboard shortcuts for better TUI support.
+ * Allow hostname to be provided in the URL without username (bugfix).
+ * Redesigned login screen with a terminal theme.
+ * User interface hints included in login screen.
+ * Added Noto Mono Nerd Font as the default, and only font.
+ * Rebranded as WebShuSH due to major redirection (upstream pull of anything is welcome)
+ * Switched to UTF-8 encoding support, only.
+ * Removed support for specifying each individual color in the URL.
+ * Removed bootstrap, popper, and jquery dependencies.
+ * Javascript dependencies managed by npm.
+ * Switched terminal resizing logic to xterm.js' fitAddon.
+ * Simpler frontend codebase.
 
 ### How it works
 ```
@@ -35,6 +52,8 @@ A simple web application to be used as an ssh client to connect to your ssh serv
 +---------+   websocket  +--------+    ssh    +-----------+
 ```
 
+It is written in Python and javscript, based on tornado, paramiko and xterm.js.
+
 ### Requirements
 
 * Python 3.8+
@@ -42,11 +61,11 @@ A simple web application to be used as an ssh client to connect to your ssh serv
 
 ### Quickstart
 
-1. Install this app, run command `pip install webssh`
-2. Start a webserver, run command `wssh`
+1. Clone this repo.
+2. Install dependencies with `pip install -r requirements.txt && npm ci`
+2. Start a webserver with `python run.py`
 3. Open your browser, navigate to `127.0.0.1:8888`
-4. Input your data, submit the form.
-
+4. Login, and connect.
 
 ### Server options
 
@@ -70,83 +89,13 @@ wssh --log-file-prefix=main.log
 wssh --help
 ```
 
-### Browser console
-
-```javascript
-// connect to your ssh server
-wssh.connect(hostname, port, username, password, privatekey, passphrase, totp);
-
-// pass an object to wssh.connect
-var opts = {
-  hostname: 'hostname',
-  port: 'port',
-  username: 'username',
-  password: 'password',
-  privatekey: 'the private key text',
-  passphrase: 'passphrase',
-  totp: 'totp'
-};
-wssh.connect(opts);
-
-// without an argument, wssh will use the form data to connect
-wssh.connect();
-
-// set a new encoding for client to use
-wssh.set_encoding(encoding);
-
-// reset encoding to use the default one
-wssh.reset_encoding();
-
-// send a command to the server
-wssh.send('ls -l');
-```
-
-### Custom Font
-
-To use custom font, put your font file in the directory `webssh/static/css/fonts/` and restart the server.
 
 ### URL Arguments
 
-Support passing arguments by url (query or fragment) like following examples:
+All login screen options can be provided as URL parameters like following examples:
 
-Passing form data (password must be encoded in base64, privatekey not supported)
-```bash
-http://localhost:8888/?hostname=xx&username=yy&password=str_base64_encoded
 ```
-
-Passing a terminal background color
-```bash
-http://localhost:8888/#bgcolor=green
-```
-
-Passing a terminal font color
-```bash
-http://localhost:8888/#fontcolor=red
-```
-
-Passing a user defined title
-```bash
-http://localhost:8888/?title=my-ssh-server
-```
-
-Passing an encoding
-```bash
-http://localhost:8888/#encoding=gbk
-```
-
-Passing a font size
-```bash
-http://localhost:8888/#fontsize=24
-```
-
-Passing a command executed right after login
-```bash
-http://localhost:8888/?command=pwd
-```
-
-Passing a terminal type
-```bash
-http://localhost:8888/?term=xterm-256color
+http://localhost:8888/?hostname=localhost&theme=nord
 ```
 
 ### Use Docker
@@ -168,12 +117,7 @@ Requirements
 pip install pytest pytest-cov codecov flake8 mock
 ```
 
-Use unittest to run all tests
-```
-python -m unittest discover tests
-```
-
-Use pytest to run all tests
+Run all tests
 ```
 python -m pytest tests
 ```
@@ -205,8 +149,9 @@ wssh --port=8080 --sslport=4433 --certfile='cert.crt' --keyfile='cert.key' --xhe
 ```
 
 
-### Tips
+### Important Security Notices
 
 * For whatever deployment choice you choose, don't forget to enable SSL.
+* This is essential to avoid exposing credentials over an unencrypted channel.
 * By default plain http requests from a public network will be either redirected or blocked and being redirected takes precedence over being blocked.
 * Try to use reject policy as the missing host key policy along with your verified known_hosts, this will prevent man-in-the-middle attacks. The idea is that it checks the system host keys file("~/.ssh/known_hosts") and the application host keys file("./known_hosts") in order, if the ssh server's hostname is not found or the key is not matched, the connection will be aborted.

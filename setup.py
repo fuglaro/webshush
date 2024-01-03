@@ -8,14 +8,12 @@ with codecs.open('README.rst', encoding='utf-8') as f:
 
 
 setup(
-    name='webssh',
+    name='WebShuSH',
     version=version,
-    description='Web based ssh client',
+    description='Whisper thin web based ssh client',
     long_description=long_description,
-    author='Shengdun Hua',
-    author_email='webmaster0115@gmail.com',
-    url='https://github.com/huashengdun/webssh',
-    packages=['webssh'],
+    author='The Shoulders of Giants',
+    url='https://github.com/fuglaro/webshush',
     entry_points='''
     [console_scripts]
     wssh = webssh.main:main
