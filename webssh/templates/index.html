@@ -1,101 +1,163 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <title> WebSSH </title>
-    <link href="static/img/favicon.png" rel="icon" type="image/png">
-    <link href="static/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
-    <link href="static/css/xterm.min.css" rel="stylesheet" type="text/css"/>
-    <link href="static/css/fullscreen.min.css" rel="stylesheet" type="text/css"/>
-    <style>
-      .row {
-        margin-top: 15px;
-        margin-bottom: 10px;
-      }
+<html lang=en>
 
-      .container {
-        margin-top: 20px;
-      }
+<head>
+  <meta charset=UTF-8>
+  <title> WebShuSH </title>
+  <link href=/static/css/xterm.min.css rel=stylesheet type=text/css>
 
-      .btn {
-        margin-top: 15px;
-      }
+  <script>
+    // Temporarily hide Macs from xtermjs loading to avoid it forcing Mac-style controls.
+    // See: https://github.com/xtermjs/xterm.js/issues/4329
+    _plt = navigator.platform
+    navigator.__defineGetter__('platform', () => _plt.indexOf('Mac') == 0 ? 'nixLinux' : _plt)
+  </script>
+  <script src=/static/js/xterm.min.js></script>
+  <script>navigator.__defineGetter__('platform', () => _plt)</script>
 
-      .btn-danger {
-        margin-left: 5px;
-      }
-      {% if font.family %}
-      @font-face {
-        font-family: '{{ font.family }}';
-        src: url('{{ font.url }}');
-      }
+  <script src=/static/js/xterm-addon-fit.min.js></script>
+  <style>
+    @font-face {
+      font-family: NotoMonoNerd;
+      src: url("/static/NotoMonoNerdFontMono-Regular.ttf");
+    }
 
-      body {
-        font-family: '{{ font.family }}';
-      }
-      {% end %}
-    </style>
-  </head>
-  <body>
-    <div id="waiter" style="display: none"> Connecting ... </div>
+    body {
+      background-color: black;
+      font-family: NotoMonoNerd;
+      margin: 0px;
+    }
 
-    <div class="container form-container" style="display: none">
-      <form id="connect" action="" method="post" enctype="multipart/form-data"{% if debug %} novalidate{% end %}>
-        <div class="row">
-          <div class="col">
-            <label for="Hostname">Hostname</label>
-            <input class="form-control" type="text" id="hostname" name="hostname" value="" required>
-          </div>
-          <div class="col">
-            <label for="Port">Port</label>
-            <input class="form-control" type="number" id="port" name="port" placeholder="22" value="" min=1 max=65535>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col">
-            <label for="Username">Username</label>
-            <input class="form-control" type="text" id="username" name="username" value="" required>
-          </div>
-          <div class="col">
-            <label for="Password">Password</label>
-            <input class="form-control" type="password" id="password" name="password" value="">
-          </div>
-        </div>
-        <div class="row">
-          <div class="col">
-            <label for="Username">Private Key</label>
-            <input class="form-control" type="file" id="privatekey" name="privatekey" value="">
-          </div>
-          <div class="col">
-            <label for="Passphrase">Passphrase</label>
-            <input class="form-control" type="password" id="passphrase" name="passphrase" value="">
-          </div>
-        </div>
-        <div class="row">
-          <div class="col">
-            <label for="totp">Totp (time-based one-time password)</label>
-            <input class="form-control" type="password" id="totp" name="totp" value="">
-          </div>
-          <div class="col">
-          </div>
-        </div>
-        <input type="hidden" id="term" name="term" value="xterm-256color">
-        {% module xsrf_form_html() %}
-        <button type="submit" class="btn btn-primary">Connect</button>
-        <button type="reset" class="btn btn-danger">Reset</button>
-      </form>
-    </div>
+    #copyModeIndicator {
+      position: fixed;
+      background-color: darkred;
+      color: white;
+      right: 0px;
+      opacity: 0.0;
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      user-select: none;
+      font-size: 15px;
+      line-height: 15px;
+      margin: 0px;
+      padding: 0px;
+      z-index: 99999999
+    }
 
-    <div class="container">
-      <div id="status" style="color: red;"></div>
-      <div id="terminal"></div>
-    </div>
+    body.copyMode #copyModeIndicator {
+      opacity: 0.6;
+    }
 
-    <script src="static/js/jquery.min.js"></script>
-    <script src="static/js/popper.min.js"></script>
-    <script src="static/js/bootstrap.min.js"></script>
-    <script src="static/js/xterm.min.js"></script>
-    <script src="static/js/xterm-addon-fit.min.js"></script>
-    <script src="static/js/main.js"></script>
-  </body>
+    .connected {
+      overflow: hidden;
+
+    }
+
+    .connected #terminal {
+      height: 100vh;
+    }
+
+    #login {
+      font-family: NotoMonoNerd;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      margin: 20px;
+      text-align: right;
+      padding: 2px;
+      flex: auto;
+    }
+
+    .loginHelp {
+      color: gray;
+      margin: 20px;
+      align-self: flex-end;
+      white-space: pre-wrap;
+      font-size: 0.7em;
+    }
+
+    #login div {
+      margin: 2px;
+    }
+
+    #login input {
+      color: white;
+      background-color: #222222;
+      border-width: thin;
+      border-style: solid;
+      appearance: none;
+    }
+
+    #login input[type=submit] {
+      font-size: 1.4em;
+      padding: 12px;
+    }
+
+    #status {
+      color: red;
+      min-height: 2em;
+    }
+  </style>
+</head>
+
+<body>
+  <div id=copyModeIndicator>COPY MODE</div>
+  <div id=terminal></div>
+  <div style='display: flex'>
+    <label class=loginHelp>
+      Selection Hints:
+      * Hold Shift to escape mouse capture
+      * Hold Alt for region selection
+      * Toggle Copy Mode: LeftShift x2
+      <br>
+      Shortcuts:
+      * Ctrl+Shift -/=: Change Font Size
+      * Ctrl+Alt -/=: Switch Theme
+    </label>
+    <form id=login onsubmit='connect(); event.preventDefault()' method=post enctype=multipart/form-data>
+      <div>
+        <label for=hostname>hostname</label>
+        <input type=text id=hostname name=hostname required>
+      </div>
+      <div>
+        <label for=port>port</label>
+        <input type=number id=port name=port value=22 min=1 max=65535 required>
+      </div>
+      <div>
+        <label for=username>username</label>
+        <input type=text id=username name=username required>
+      </div>
+      <div>
+        <label for=password>password</label>
+        <input type=password id=password name=password>
+      </div>
+      <div>
+        <label for=code>code</label>
+        <input type=password id=code name=code>
+      </div>
+      <div>
+        <label for=privatekey>privatekey</label>
+        <input type=file id=privatekey name=privatekey>
+      </div>
+      <div>
+        <label for=passphrase>with passphrase</label>
+        <input type=password id=passphrase name=passphrase>
+      </div>
+      <div>
+        <label for=theme>theme</label>
+        <input type=text id=theme name=theme pattern="[0-9a-zA-Z\-\._]*" list=themes autocomplete=off value=default>
+        <datalist id=themes>
+        </datalist>
+      </div>
+      <div>
+        <input type=submit value=CONNECT>
+      </div>
+      <div id=status></div>
+      {% module xsrf_form_html() %}
+    </form>
+  </div>
+  <script src=/static/js/validator.js></script>
+  <script src=/static/js/main.js></script>
+</body>
+
 </html>

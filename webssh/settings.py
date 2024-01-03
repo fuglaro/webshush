@@ -80,9 +80,7 @@ def get_app_settings(options):
         websocket_ping_interval=options.wpintvl,
         debug=options.debug,
         xsrf_cookies=options.xsrf,
-        font=Font(
-            get_font_filename(options.font,
-                              os.path.join(base_dir, *font_dirs)),
+        font=Font(options.font,
             font_dirs[1:]
         ),
         origin_policy=get_origin_setting(options)
