@@ -97,6 +97,7 @@ function disconnect() {
 async function connect() {
   // Only allow one connection at a time.
   if (document.title !== 'WebShuSH') return
+  document.title = `WebShuSH (...)`
 
 
   // Validate form values
@@ -110,6 +111,7 @@ async function connect() {
   if (pk.name && (pk.size > 16384 || !pk.size || !await pk.text()))
     statusMsg.innerText = 'Invalid key ' + pk.name
   if (statusMsg.innerText) return
+  statusMsg.innerText = '...'
 
 
   // Request connection
