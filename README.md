@@ -31,7 +31,7 @@ This is a simple web application to be used as an ssh client to connect to your 
  * Default theme switched to Alacritty's default theme.
  * Allow theme selection to be included in the URL parameters.
  * Added Copy Mode allowing Copy/Paste shortcuts on Linux and Windows.
- * Support for region select and forced selection from Macs.
+ * Support for region select and forced selection on Macs.
  * Disable most browser based keyboard shortcuts for better TUI support.
  * Allow hostname to be provided in the URL without username (bugfix).
  * Redesigned login screen with a terminal theme.
