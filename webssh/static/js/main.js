@@ -23,8 +23,6 @@ for (const [key, value] of new URL(document.location).searchParams.entries()) {
 // msgQueue: preserves order of ssh messages sent to the terminal.
 let msgQueue = Promise.resolve()
 let statusMsg = document.getElementById("status")
-// copyMode: Allow Ctrl+c & Ctrl+v shortcuts (0-off 1-off-init 2-on 3-on-deinit)
-var copyMode = 0
 var term
 
 window.onresize = () => term && term.___resize___()
@@ -150,6 +148,8 @@ async function connect() {
   sock.onopen = async () => {
     let container = document.getElementById('terminal')
     let currentTheme = document.getElementById('theme')
+    // copyMode: Allow Ctrl+c & Ctrl+v shortcuts (0-off 1-off-init 2-on 3-on-deinit)
+    var copyMode = 0
 
     term = new window.Terminal({
       'fontFamily': container.style.fontFamily,
@@ -213,7 +213,7 @@ async function connect() {
 
   sock.onerror = sock.onclose = e => {
     statusMsg.innerText = e.reason || e.type || e
-    document.body.classList.remove('copyModeIndicator')
+    document.body.classList.remove('copyMode')
     disconnect()
   }
 
