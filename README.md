@@ -21,7 +21,7 @@ This is a simple web application to be used as an ssh client to connect to your 
 * Terminal window resizable.
 * Modern browsers including Chrome, Firefox, Safari, Edge, Opera supported.
 
-### Features beyond WebSSH
+### Features beyond WebSSH (as of v1.6.2 - April 2023)
 
  * Updated to xterm.js 5.3.0.
  * Staggeringly faster interactivity, especially with truecolor.
