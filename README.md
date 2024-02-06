@@ -44,6 +44,7 @@ This is a simple web application to be used as an ssh client to connect to your 
  * Javascript dependencies managed by npm.
  * Switched terminal resizing logic to xterm.js' fitAddon.
  * Simpler frontend codebase.
+ * Enchanced security with removal of a reflected XSS vulnerability.
 
 ## How it works
 ```
