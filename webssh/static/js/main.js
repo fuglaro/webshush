@@ -7,7 +7,7 @@
 // Prevent as many browser shortcuts (except copy and paste).
 // Note the browser will not repect this for some reserved shortcuts.
 window.addEventListener('keydown', e => {
-  let mods = [+e.altKey, +e.ctrlKey, +e.metaKey, +e.shiftKey].join('')
+  const mods = [+e.altKey, +e.ctrlKey, +e.metaKey, +e.shiftKey].join('')
   if (mods == '0000' || mods == '0001') return
   if ((e.code == 'KeyC' || e.code == 'KeyV') && (mods == '0010' || mods == '0100'))
     return
@@ -15,14 +15,14 @@ window.addEventListener('keydown', e => {
 })
 
 // Update values in the form with details in the URL.
-for (const [key, value] of new URL(document.location).searchParams.entries()) {
-  let el = document.getElementById(key)
+for (const [key, value] of new URL(window.location).searchParams.entries()) {
+  const el = document.getElementById(key)
   if (el && el.nodeName == "INPUT") el.value = value
 }
 
 // msgQueue: preserves order of ssh messages sent to the terminal.
-let msgQueue = Promise.resolve()
-let statusMsg = document.getElementById("status")
+var msgQueue = Promise.resolve()
+const statusMsg = document.getElementById("status")
 var term
 
 window.onresize = () => term && term.___resize___()
@@ -33,7 +33,7 @@ window.onresize = () => term && term.___resize___()
  * @param {string} contents - The theme file contents.
  */
 function loadTheme(contents) {
-  var theme = {}
+  const theme = {}
   contents.split('[colors.')
     .forEach(s => {
       var p = s.split(']')[0]
@@ -68,7 +68,7 @@ seashells,smoooooth,snazzy,solarized_dark,solarized_light,taerminal,tango_dark,t
 terminal_app,thelovelace,tokyo-night-storm,tokyo-night,tomorrow_night,
 tomorrow_night_bright,ubuntu,wombat,xterm,zenburn`).replaceAll('\n', '').split(',')
 {
-  let themeOptions = document.getElementById('themes')
+  const themeOptions = document.getElementById('themes')
   themes.forEach(t => {
     opt = document.createElement('option')
     opt.value = t
@@ -94,25 +94,27 @@ function disconnect() {
  * the backend using the details and credentioals in the login form,
  * and display the connected terminal fullscreened.
  */
+var _abort = null
 async function connect() {
-  // Only allow one connection at a time.
-  if (document.title !== 'WebShuSH') return
   document.title = `WebShuSH (...)`
-
+  // Only allow one connection at a time.
+  if (_abort) _abort.abort()
+  if (term) disconnect()
+  _abort = new AbortController()
 
   // Validate form values
-  let form = document.getElementById("login")
-  let data = new FormData(form)
-  let hostname = data.get('hostname')
+  const form = document.getElementById("login")
+  const data = new FormData(form)
+  const hostname = data.get('hostname')
   statusMsg.innerText = ''
   if (!hostname_validator.test(hostname))
     statusMsg.innerText = 'Invalid hostname: ' + hostname
-  let pk = data.get('privatekey')
+  const pk = data.get('privatekey')
   if (pk.name && (pk.size > 16384 || !pk.size || !await pk.text()))
     statusMsg.innerText = 'Invalid key ' + pk.name
   if (statusMsg.innerText) return
   statusMsg.innerText = '...'
-
+  const themereq = fetch(`/static/themes/${data.get('theme')}.toml`)
 
   // Request connection
   const resp = await fetch(form.action, {
@@ -123,10 +125,10 @@ async function connect() {
     // request. This would simplify the code, and also remove the
     // vulnerability that connections are established but never
     // closed.
+    signal: _abort.signal,
     method: "POST",
     body: data,
   })
-
 
   // Validate response
   if (resp.status !== 200) {
@@ -134,29 +136,35 @@ async function connect() {
     disconnect()
     return
   }
-  let r = await resp.json()
+  const r = await resp.json()
   if (!r.id) {
     statusMsg.innerText = r.status
     disconnect()
     return
   }
 
-
   // Connect terminal
-  let loc = window.location
-  let url = `${loc.protocol === 'http:' ? 'ws:' : 'wss:'}//${loc.host}/ws?id=${r.id}`
-  let sock = new window.WebSocket(url)
+  const theme =loadTheme(await (await themereq).text())
+  const protocol = window.location.protocol === 'http:' ? 'ws:' : 'wss:'
+  const url = `${protocol}//${window.location.host}/ws?id=${r.id}`
+  const sock = new window.WebSocket(url)
 
-  sock.onopen = async () => {
-    let container = document.getElementById('terminal')
-    let currentTheme = document.getElementById('theme')
+  sock.onerror = sock.onclose = e => {
+    statusMsg.innerText = e.reason || e.type || e
+    document.body.classList.remove('copyMode')
+    disconnect()
+  }
+
+  sock.onopen = () => {
+    const container = document.getElementById('terminal')
+    const currentTheme = document.getElementById('theme')
     // copyMode: Allow Ctrl+c & Ctrl+v shortcuts (0-off 1-off-init 2-on 3-on-deinit)
     var copyMode = 0
 
+    if (_abort.signal.aborted) return
     term = new window.Terminal({
       'fontFamily': container.style.fontFamily,
-      'theme': loadTheme(await (await fetch(
-        `/static/themes/${data.get('theme')}.toml`)).text()),
+      'theme': theme,
     })
     term.onData(data => sock.send(JSON.stringify({ 'data': data })))
     fitAddon = new window.FitAddon.FitAddon()
@@ -171,7 +179,7 @@ async function connect() {
 
     term.attachCustomKeyEventHandler(e => {
       if (e.type != 'keydown') return
-      let mods = [+e.altKey, +e.ctrlKey, +e.metaKey, +e.shiftKey].join('')
+      const mods = [+e.altKey, +e.ctrlKey, +e.metaKey, +e.shiftKey].join('')
 
       // Handle font size controls.
       if (mods == '0101' && e.code == 'Minus') {
@@ -186,8 +194,8 @@ async function connect() {
 
       // Handle theme switching.
       if (mods == '1100' && (e.code == 'Minus' || e.code == 'Equal')) {
-        let d = e.code == 'Equal' ? 1 : -1
-        let l = themes.length
+        const d = e.code == 'Equal' ? 1 : -1
+        const l = themes.length
         nextTheme = themes[((themes.indexOf(currentTheme.value) + d) % l + l) % l]
         currentTheme.value = nextTheme
         fetch(`/static/themes/${nextTheme}.toml`).then(r => r.text().then(
@@ -205,19 +213,14 @@ async function connect() {
       if (document.body.classList.contains('copyMode') != copyMode >= 2)
         document.body.classList.toggle('copyMode')
       // Don't send copy/paste shortcuts if in copyMode
-      let copypaste = (e.code == 'KeyC' || e.code == 'KeyV') && mods == '0100'
+      const copypaste = (e.code == 'KeyC' || e.code == 'KeyV') && mods == '0100'
       return copyMode < 2 || !copypaste;
     });
+    if (_abort.signal.aborted) sock.close()
   }
 
   sock.onmessage = msg => msgQueue = msgQueue.then(
     () => msg.data.text().then(m => term && term.write(m)))
-
-  sock.onerror = sock.onclose = e => {
-    statusMsg.innerText = e.reason || e.type || e
-    document.body.classList.remove('copyMode')
-    disconnect()
-  }
 
   document.title = `WebShuSH (${data.get('hostname')})`
   document.body.classList.add("connected")
