@@ -2,6 +2,9 @@
 
 A whisper thin SSH client for the browser.
 
+* TODO Websocket then never keep the credentials in javascript, in http requests, or in dom elements.
+* TODO Only allow and send credentials over ws/http if domain is localhost.
+* TODO Click should reset copy mode double shift detection.
 
 Login screen:
 ![Login](preview/login.png)
