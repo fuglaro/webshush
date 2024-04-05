@@ -220,7 +220,7 @@ async function connect() {
   }
 
   sock.onmessage = msg => msgQueue = msgQueue.then(
-    () => msg.data.text().then(m => term && term.write(m)))
+    () => msg.data.arrayBuffer().then(m => term && term.write(new Uint8Array(m))))
 
   document.title = `WebShuSH (${data.get('hostname')})`
   document.body.classList.add("connected")
