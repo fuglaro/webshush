@@ -14,6 +14,12 @@ window.addEventListener('keydown', e => {
   e.preventDefault()
 })
 
+// copyMode: Allow Ctrl+c & Ctrl+v shortcuts (0-off 1-off-init 2-on 3-on-deinit)
+var copyMode = 0
+window.addEventListener("mousedown", () => {
+    copyMode = (copyMode >> 1) << 1
+})
+
 // Update values in the form with details in the URL.
 for (const [key, value] of new URL(window.location).searchParams.entries()) {
   const el = document.getElementById(key)
@@ -158,8 +164,7 @@ async function connect() {
   sock.onopen = () => {
     const container = document.getElementById('terminal')
     const currentTheme = document.getElementById('theme')
-    // copyMode: Allow Ctrl+c & Ctrl+v shortcuts (0-off 1-off-init 2-on 3-on-deinit)
-    var copyMode = 0
+    copyMode = 0
 
     if (_abort.signal.aborted) return
     term = new window.Terminal({
